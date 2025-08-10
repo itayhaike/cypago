@@ -15,7 +15,6 @@ data:
     postgres_exporter['enable'] = false
     pgbouncer_exporter['enable'] = false
     gitlab_exporter['enable'] = false
-    grafana['enable'] = false
     
     # Minimal worker configuration for ARM
     puma['worker_processes'] = 1
