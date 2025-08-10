@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-config
+  namespace: gitlab
+data:
+  gitlab.rb: |
+    external_url 'http://gitlab.example.local'
+    
+    # Disable monitoring completely
+    prometheus['enable'] = false
+    alertmanager['enable'] = false
+    node_exporter['enable'] = false
+    redis_exporter['enable'] = false
+    postgres_exporter['enable'] = false
+    pgbouncer_exporter['enable'] = false
+    gitlab_exporter['enable'] = false
+    grafana['enable'] = false
+    
+    # Minimal worker configuration for ARM
+    puma['worker_processes'] = 1
+    puma['min_threads'] = 1
+    puma['max_threads'] = 2
+    puma['worker_timeout'] = 300
+    puma['worker_memory_limit_min'] = "400m"
+    puma['worker_memory_limit_max'] = "650m"
+    
+    # Minimal sidekiq
+    sidekiq['max_concurrency'] = 3
+    
+    # Minimal PostgreSQL  
+    postgresql['shared_buffers'] = "64MB"
+    postgresql['max_connections'] = 30
+    postgresql['work_mem'] = "4MB"
+    
+    # Disable heavy services
+    gitlab_pages['enable'] = false
+    gitlab_kas['enable'] = false
+    sentinel['enable'] = false
+    registry['enable'] = false
+    mattermost['enable'] = false
+    
+    # Minimal nginx
+    nginx['worker_processes'] = 1
+    nginx['worker_connections'] = 256
+    nginx['redirect_http_to_https'] = false
+    nginx['listen_port'] = 80
+    
+    # Set root password
+    gitlab_rails['initial_root_password'] = 'ChangeMeNow123!'
+    
+    # Disable heavy features
+    gitlab_rails['usage_ping_enabled'] = false
+    gitlab_rails['sentry_enabled'] = false

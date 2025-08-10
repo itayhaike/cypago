@@ -53,9 +53,34 @@ Visit https://localhost:8080 and login with:
 
 ### 3. Deploy GitLab
 
+#### Option A: Using Git Repository (Recommended for ArgoCD)
+
+1. **Push this repository to GitHub:**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/YOUR_USERNAME/cypago
+   git push -u origin main
+   ```
+
+2. **Update ArgoCD application with your repo URL:**
+   ```bash
+   # Edit argocd-apps/gitlab-gitops.yaml
+   # Replace YOUR_USERNAME with your GitHub username
+   sed -i '' 's/YOUR_USERNAME/<your-github-username>/g' argocd-apps/gitlab-gitops.yaml
+   ```
+
+3. **Deploy GitLab via ArgoCD:**
+   ```bash
+   kubectl apply -f argocd-apps/gitlab-gitops.yaml
+   ```
+
+#### Option B: Direct Deployment (Without Git)
+
 ```bash
-# Deploy GitLab via ArgoCD
-kubectl apply -f argocd-apps/gitlab-simple.yaml
+# Deploy GitLab directly
+kubectl apply -f argocd-apps/gitlab-direct.yaml
 
 # Monitor deployment
 kubectl get pods -n gitlab -w

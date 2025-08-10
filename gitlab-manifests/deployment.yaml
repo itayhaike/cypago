@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab
+  namespace: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      nodeSelector:
+        role: app
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+      containers:
+      - name: gitlab
+        image: gitlab/gitlab-ce:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 22
+          name: ssh
+        env:
+        - name: GITLAB_OMNIBUS_CONFIG
+          value: |
+            from_file('/etc/gitlab/gitlab.rb')
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - SYS_RESOURCE
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2.5Gi
+          limits:
+            cpu: 1500m
+            memory: 3.5Gi
+        volumeMounts:
+        - name: gitlab-data
+          mountPath: /var/opt/gitlab
+        - name: gitlab-logs
+          mountPath: /var/log/gitlab
+        - name: gitlab-config
+          mountPath: /etc/gitlab
+          subPath: config
+        - name: gitlab-config-rb
+          mountPath: /etc/gitlab/gitlab.rb
+          subPath: gitlab.rb
+        livenessProbe:
+          httpGet:
+            path: /-/liveness
+            port: 80
+          initialDelaySeconds: 600
+          periodSeconds: 60
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 300
+          periodSeconds: 60
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 5
+      volumes:
+      - name: gitlab-data
+        emptyDir:
+          sizeLimit: 10Gi
+      - name: gitlab-logs
+        emptyDir: {}
+      - name: gitlab-config
+        emptyDir: {}
+      - name: gitlab-config-rb
+        configMap:
+          name: gitlab-config
+          items:
+          - key: gitlab.rb
+            path: gitlab.rb
