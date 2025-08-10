@@ -64,4 +64,15 @@ module "eks" {
   }
 }
 
+# Add EBS CSI Driver IAM policy to both node groups for persistent volume support
+resource "aws_iam_role_policy_attachment" "ebs_csi_policy_argocd" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role       = module.eks.eks_managed_node_groups["argocd"].iam_role_name
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_policy_app" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role       = module.eks.eks_managed_node_groups["app"].iam_role_name
+}
+
 
