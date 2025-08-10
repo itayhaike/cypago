@@ -78,10 +78,11 @@ spec:
           failureThreshold: 5
       volumes:
       - name: gitlab-data
-        emptyDir:
-          sizeLimit: 10Gi
+        persistentVolumeClaim:
+          claimName: gitlab-data-pvc
       - name: gitlab-logs
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: gitlab-logs-pvc
       - name: gitlab-config
         emptyDir: {}
       - name: gitlab-config-rb

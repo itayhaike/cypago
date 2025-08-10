@@ -153,12 +153,22 @@ If successful, sign in at `http://localhost:8181` with:
 - Username: `root`
 - Password: the value you provided
 
+**LoadBalancer Access (External):**
 ```bash
-# Wait ~5-10 minutes for initialization
+# Get the external URL (takes 2-3 minutes to provision)
+kubectl get svc gitlab -n gitlab
+
+# Access via the EXTERNAL-IP
+# Example: http://a1234567890abcdef-1234567890.eu-west-1.elb.amazonaws.com
+```
+
+**Port-forward Access (Local):**
+```bash
+# Alternative local access method
 kubectl port-forward svc/gitlab -n gitlab 8181:80
 ```
 
-Access: http://localhost:8181 (root / ChangeMeNow123!)
+Access: External LoadBalancer URL or http://localhost:8181 (root / ChangeMeNow123!)
 
 ## 📁 Repository Structure
 
@@ -166,6 +176,11 @@ Access: http://localhost:8181 (root / ChangeMeNow123!)
   cypago/
   ├── terraform/           # Infrastructure
   ├── gitlab-manifests/    # GitLab K8s resources
+  │   ├── configmap.yaml   # GitLab configuration
+  │   ├── deployment.yaml  # GitLab deployment with PVCs
+  │   ├── namespace.yaml   # Namespace definition
+  │   ├── pvc.yaml         # Persistent Volume Claims
+  │   └── service.yaml     # LoadBalancer service
   ├── argocd-apps/
   │   └── gitlab.yaml      # Single ArgoCD application
   ├── scripts/
@@ -192,6 +207,8 @@ For production, I would use the official Helm chart on larger x86 instances with
 - **Resource Optimized**: Runs on t4g.medium instances
 - **Infrastructure as Code**: Complete Terraform setup
 - **Node Separation**: ArgoCD and GitLab on dedicated nodes
+- **LoadBalancer Exposure**: External access via AWS Load Balancer
+- **Persistent Storage**: Data survives pod restarts with EBS volumes
 
 ## 🔧 Common Operations
 
@@ -238,6 +255,11 @@ terraform destroy -auto-approve
 ✅ **Single AZ**: Worker nodes deployed in eu-west-1a as specified  
 ✅ **ARM64 Architecture**: t4g.medium instances for cost optimization  
 ✅ **Automation**: One-command deployment with GitOps sync
+
+## 🏆 Optional Bonuses Implemented
+
+✅ **LoadBalancer Exposure**: External access via AWS ALB/NLB  
+✅ **Persistent Storage**: EBS volumes for data persistence across pod restarts
 
 ## 📝 Notes
 

@@ -4,7 +4,7 @@ metadata:
   name: gitlab
   namespace: gitlab
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: gitlab
   ports:

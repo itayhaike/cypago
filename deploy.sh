@@ -55,7 +55,7 @@ ARGOCD_PASSWORD=$(kubectl get secret argocd-initial-admin-secret -n argocd -o js
 # Deploy GitLab via ArgoCD
 print_step "Deploying GitLab via ArgoCD..."
 cd ..
-kubectl apply -f argocd-apps/gitlab-gitops.yaml
+kubectl apply -f argocd-apps/gitlab.yaml
 
 print_info "GitLab ArgoCD application created!"
 
@@ -106,10 +106,11 @@ echo "  Password: $ARGOCD_PASSWORD"
 echo "  Command: kubectl port-forward svc/argocd-server -n argocd 8080:443"
 echo ""
 echo "🦊 GitLab:"
-echo "  URL: http://localhost:8181"
+echo "  External URL: Get with 'kubectl get svc gitlab -n gitlab' (EXTERNAL-IP column)"
+echo "  Local URL: http://localhost:8181" 
 echo "  Username: root"
 echo "  Password: $GITLAB_PASSWORD"
-echo "  Command: kubectl port-forward svc/gitlab -n gitlab 8181:80"
+echo "  Port-forward command: kubectl port-forward svc/gitlab -n gitlab 8181:80"
 echo ""
 echo "📊 Monitoring Commands:"
 echo "  Check GitLab status: kubectl get pods -n gitlab"
