@@ -138,7 +138,7 @@ Use the provided script to reset the `root` password inside the GitLab pod:
 
 ```bash
 # Wait until the GitLab pod is Ready (1/1), then run:
-./scripts/reset-gitlab-password.sh 'MyNewSecurePassword123!'
+./reset-gitlab-password.sh 'MyNewSecurePassword123!'
 ```
 
 If successful, sign in at `http://localhost:8181` with:
@@ -172,7 +172,7 @@ kubectl port-forward svc/gitlab -n gitlab 8181:80
 ### Access Credentials
 - **Username**: `root`
 - **Default Password**: `ChangeMeNow123!`
-- **Reset Password**: `./scripts/reset-gitlab-password.sh <new-password>`
+- **Reset Password**: `./reset-gitlab-password.sh <new-password>`
 
 ## 📁 Repository Structure
 
@@ -187,10 +187,10 @@ kubectl port-forward svc/gitlab -n gitlab 8181:80
   │   └── service.yaml     # LoadBalancer service
   ├── argocd-apps/
   │   └── gitlab.yaml      # Single ArgoCD application
-  ├── scripts/
-  │   └── reset-gitlab-password.sh
+  │   
   ├── deploy.sh           # Automation
   └── README.md          # Documentation
+  └── reset-gitlab-password.sh
 ```
 
 ## 💡 Design Decisions
@@ -224,7 +224,7 @@ kubectl get all -n gitlab
 kubectl logs -f deployment/gitlab -n gitlab
 
 # Reset GitLab password (wait for pod to be fully ready)
-./scripts/reset-gitlab-password.sh <new-password>
+./reset-gitlab-password.sh <new-password>
 
 # Force ArgoCD sync
 kubectl patch application gitlab -n argocd --type merge -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}'
