@@ -240,6 +240,7 @@ kubectl patch application gitlab -n argocd --type merge -p '{"metadata":{"annota
 | Pod not ready | Wait 10-15 minutes for GitLab initialization on ARM64 |
 | **Readiness probe timeouts** | **Normal during GitLab startup - probe fails with "context deadline exceeded" for 10-15 minutes on ARM64** |
 | **Deploy.sh password reset fails** | **Expected behavior - GitLab not ready yet during automated deployment. Run `./reset-gitlab-password.sh <password>` manually after GitLab stabilizes** |
+| **Liveness probe 404 failures** | **Normal on t4g.medium - GitLab becomes temporarily unresponsive under memory/CPU pressure every few minutes. Pod restarts briefly but remains functional for testing** |
 | CrashLoopBackOff | Check logs: `kubectl logs -n gitlab <pod>` |
 | External IP not working | Normal behavior - try again in 5-10 minutes, AWS LoadBalancer provisioning varies |
 | **LoadBalancer not accessible** | **Common AWS timing issue - delete and recreate service: `kubectl delete svc gitlab -n gitlab`, then ArgoCD will recreate it** |
