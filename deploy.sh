@@ -66,7 +66,7 @@ kubectl wait --for=condition=available --timeout=900s deployment/gitlab -n gitla
 
 print_info "GitLab deployed successfully!"
 
-# Ask user if they want to reset GitLab password
+Ask user if they want to reset GitLab password
 echo ""
 echo -e "${YELLOW}Would you like to reset the GitLab root password? (y/N):${NC}"
 read -r RESET_PASSWORD
@@ -79,9 +79,9 @@ if [[ $RESET_PASSWORD =~ ^[Yy]$ ]]; then
     if [ ${#NEW_GITLAB_PASSWORD} -lt 8 ]; then
         print_error "Password must be at least 8 characters long. Skipping password reset."
     else
-        print_step "Resetting GitLab password..."
-        if ./scripts/reset-gitlab-password.sh "$NEW_GITLAB_PASSWORD"; then
-            print_info "GitLab password reset successfully!"
+        echo "Resetting GitLab password..."
+        if ./reset-gitlab-password.sh "$NEW_GITLAB_PASSWORD"; then
+            echo "GitLab password reset successfully!"
             GITLAB_PASSWORD="$NEW_GITLAB_PASSWORD"
         else
             print_error "Failed to reset GitLab password. You can try manually later."
@@ -118,7 +118,7 @@ echo "  Check ArgoCD apps: kubectl get applications -n argocd"
 echo "  View GitLab logs: kubectl logs -f deployment/gitlab -n gitlab"
 echo ""
 echo "🔑 Password Reset:"
-echo "  Reset GitLab password: ./scripts/reset-gitlab-password.sh <new-password>"
+echo "  Reset GitLab password: ./reset-gitlab-password.sh <new-password>"
 echo ""
 echo "🧹 Cleanup:"
 echo "  Delete GitLab: kubectl delete application gitlab -n argocd"

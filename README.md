@@ -32,6 +32,8 @@ The script will:
 5. Provide access credentials and port-forward commands
 6. Optionally reset GitLab password
 
+**⚠️ Important Note**: The automated password reset during deployment may fail if GitLab is not fully initialized. This is normal ARM64 behavior - GitLab takes 10-15 minutes to become completely ready. If the password reset fails during `deploy.sh`, wait a few minutes and run `./reset-gitlab-password.sh <password>` manually once GitLab is stable.
+
 ### Option 2: Manual Step-by-Step Deployment
 
 ### 1. Deploy Infrastructure
@@ -161,8 +163,9 @@ kubectl get svc gitlab -n gitlab
 - **Initial provisioning**: 2-3 minutes for AWS to create LoadBalancer
 - **GitLab initialization**: 10-15 minutes for GitLab to become fully ready
 - **Intermittent availability**: LoadBalancer may take additional time to become consistently accessible (normal AWS behavior)
+- **Service timing issue**: If LoadBalancer shows external IP but is not accessible, delete the service (`kubectl delete svc gitlab -n gitlab`) - ArgoCD will automatically recreate it with proper target registration
 
-### Local Port-Forward Access (Always Works)
+### Local Port-Forward Access
 ```bash
 # Reliable local access method
 kubectl port-forward svc/gitlab -n gitlab 8181:80
@@ -235,8 +238,11 @@ kubectl patch application gitlab -n argocd --type merge -p '{"metadata":{"annota
 | Issue | Solution |
 |-------|----------|
 | Pod not ready | Wait 10-15 minutes for GitLab initialization on ARM64 |
+| **Readiness probe timeouts** | **Normal during GitLab startup - probe fails with "context deadline exceeded" for 10-15 minutes on ARM64** |
+| **Deploy.sh password reset fails** | **Expected behavior - GitLab not ready yet during automated deployment. Run `./reset-gitlab-password.sh <password>` manually after GitLab stabilizes** |
 | CrashLoopBackOff | Check logs: `kubectl logs -n gitlab <pod>` |
 | External IP not working | Normal behavior - try again in 5-10 minutes, AWS LoadBalancer provisioning varies |
+| **LoadBalancer not accessible** | **Common AWS timing issue - delete and recreate service: `kubectl delete svc gitlab -n gitlab`, then ArgoCD will recreate it** |
 | Port-forward connection refused | GitLab not ready yet - wait for pod status 1/1 Ready |
 | ArgoCD not syncing | Refresh: See force sync command above |
 | Memory pressure | Resource limits optimized for t4g.medium |
@@ -270,11 +276,17 @@ terraform destroy -auto-approve
 
 ## 📝 Notes
 
-- GitLab takes 5-10 minutes to initialize on t4g.medium
-- Single-AZ deployment (per requirements)
-- Credentials in ConfigMap (change for production)
-- Resource optimized for constrained environments
-- Perfect for integration testing and development
+### Performance & Timing
+- **GitLab initialization**: 10-15 minutes on ARM64 t4g.medium instances
+- **Readiness probe failures**: Normal during startup - GitLab responds with timeouts until fully initialized
+- **LoadBalancer provisioning**: 2-3 minutes initial, may have intermittent availability
+- **Memory optimization**: Aggressive resource tuning for constrained environments
+
+### Architecture & Configuration
+- **Single-AZ deployment** (per task requirements)
+- **ARM64 optimization** for cost efficiency
+- **Default credentials** in ConfigMap (change for production use)
+- **Perfect for integration testing and development environments**
 
 ## 🙌 Acknowledgements
 
