@@ -42,11 +42,11 @@ spec:
             - SYS_RESOURCE
         resources:
           requests:
-            cpu: 300m
-            memory: 1.8Gi
+            cpu: 500m
+            memory: 2.2Gi
           limits:
-            cpu: 1200m
-            memory: 2.8Gi
+            cpu: 1500m
+            memory: 3.5Gi
         volumeMounts:
         - name: gitlab-data
           mountPath: /var/opt/gitlab
@@ -71,11 +71,11 @@ spec:
           httpGet:
             path: /
             port: 80
-          initialDelaySeconds: 300
-          periodSeconds: 60
-          timeoutSeconds: 30
+          initialDelaySeconds: 400
+          periodSeconds: 90
+          timeoutSeconds: 45
           successThreshold: 1
-          failureThreshold: 5
+          failureThreshold: 8
       volumes:
       - name: gitlab-data
         persistentVolumeClaim:
