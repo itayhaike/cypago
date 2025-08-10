@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_USERNAME/cypago  # Replace with your GitHub repo URL
+    repoURL: https://github.com/itayhaike/cypago
     targetRevision: HEAD
     path: gitlab-manifests  # Path to the manifests directory in your repo
   destination:
