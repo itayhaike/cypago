@@ -87,13 +87,6 @@ Short explanation: Deploys a minimal GitLab Omnibus instance pinned to the `app`
 # Apply ArgoCD application (syncs from GitHub repo)
 kubectl apply -f argocd-apps/gitlab.yaml
 
-# Update existing ArgoCD application (if already deployed)
-kubectl apply -f argocd-apps/gitlab.yaml
-
-# Or delete and recreate if needed
-kubectl delete application gitlab -n argocd
-kubectl apply -f argocd-apps/gitlab.yaml
-
 # Monitor deployment
 kubectl get pods -n gitlab -w
 
@@ -153,22 +146,33 @@ If successful, sign in at `http://localhost:8181` with:
 - Username: `root`
 - Password: the value you provided
 
-**LoadBalancer Access (External):**
+## 🌐 Accessing GitLab
+
+### External LoadBalancer Access (Production-Ready)
 ```bash
-# Get the external URL (takes 2-3 minutes to provision)
+# Get the external URL 
 kubectl get svc gitlab -n gitlab
 
-# Access via the EXTERNAL-IP
-# Example: http://a1234567890abcdef-1234567890.eu-west-1.elb.amazonaws.com
+# Access via the EXTERNAL-IP hostname
+# Example: http://a934182104509442ba9f4709e321db54-416032959.eu-west-1.elb.amazonaws.com
 ```
 
-**Port-forward Access (Local):**
+**⏱️ LoadBalancer Timing Notes:**
+- **Initial provisioning**: 2-3 minutes for AWS to create LoadBalancer
+- **GitLab initialization**: 10-15 minutes for GitLab to become fully ready
+- **Intermittent availability**: LoadBalancer may take additional time to become consistently accessible (normal AWS behavior)
+
+### Local Port-Forward Access (Always Works)
 ```bash
-# Alternative local access method
+# Reliable local access method
 kubectl port-forward svc/gitlab -n gitlab 8181:80
+# Then open: http://localhost:8181
 ```
 
-Access: External LoadBalancer URL or http://localhost:8181 (root / ChangeMeNow123!)
+### Access Credentials
+- **Username**: `root`
+- **Default Password**: `ChangeMeNow123!`
+- **Reset Password**: `./scripts/reset-gitlab-password.sh <new-password>`
 
 ## 📁 Repository Structure
 
@@ -230,11 +234,14 @@ kubectl patch application gitlab -n argocd --type merge -p '{"metadata":{"annota
 
 | Issue | Solution |
 |-------|----------|
-| Pod not ready | Wait 5-10 minutes for initialization |
+| Pod not ready | Wait 10-15 minutes for GitLab initialization on ARM64 |
 | CrashLoopBackOff | Check logs: `kubectl logs -n gitlab <pod>` |
+| External IP not working | Normal behavior - try again in 5-10 minutes, AWS LoadBalancer provisioning varies |
+| Port-forward connection refused | GitLab not ready yet - wait for pod status 1/1 Ready |
 | ArgoCD not syncing | Refresh: See force sync command above |
 | Memory pressure | Resource limits optimized for t4g.medium |
 | Password reset fails | Wait for pod to be fully ready (1/1) before running script |
+| PVC Pending | Check EBS CSI driver: `kubectl get pods -n kube-system \| grep ebs-csi` |
 
 ## 🧹 Cleanup
 
@@ -258,8 +265,8 @@ terraform destroy -auto-approve
 
 ## 🏆 Optional Bonuses Implemented
 
-✅ **LoadBalancer Exposure**: External access via AWS ALB/NLB  
-✅ **Persistent Storage**: EBS volumes for data persistence across pod restarts
+**LoadBalancer Exposure**: External access via AWS ALB/NLB  
+**Persistent Storage**: EBS volumes for data persistence across pod restarts
 
 ## 📝 Notes
 
@@ -271,4 +278,4 @@ terraform destroy -auto-approve
 
 ## 🙌 Acknowledgements
 
-I used Claude (AI) to assist with parts of this home assignment and referenced the official GitLab Omnibus documentation. Using AI tools is part of my workflow—and, I believe, the future of engineering productivity. 🙂
+I used Claude Code (AI) to assist with parts of this home assignment and referenced the official GitLab Omnibus documentation. Using AI tools is part of my workflow—and, I believe, the future of engineering productivity. 🙂

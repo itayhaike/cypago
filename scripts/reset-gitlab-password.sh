@@ -91,9 +91,25 @@ if [ $? -eq 0 ]; then
     echo "  Username: root"
     echo "  Password: ${NEW_PASSWORD}"
     echo ""
-    echo "To access GitLab UI, run:"
-    echo "  kubectl port-forward -n gitlab svc/gitlab 8181:80"
-    echo "Then open: http://localhost:8181"
+    
+    # Get external LoadBalancer IP
+    EXTERNAL_IP=$(kubectl get svc gitlab -n gitlab -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null)
+    
+    if [ -n "$EXTERNAL_IP" ] && [ "$EXTERNAL_IP" != "null" ]; then
+        echo "GitLab URLs:"
+        echo "  External URL: http://${EXTERNAL_IP}"
+        echo "  Local URL (port-forward): http://localhost:8181"
+        echo ""
+        echo "To use port-forward (alternative):"
+        echo "  kubectl port-forward -n gitlab svc/gitlab 8181:80"
+    else
+        echo "To access GitLab UI, run:"
+        echo "  kubectl port-forward -n gitlab svc/gitlab 8181:80"
+        echo "Then open: http://localhost:8181"
+        echo ""
+        echo "Or get external URL with:"
+        echo "  kubectl get svc gitlab -n gitlab"
+    fi
 elif [ $? -eq 124 ]; then
     echo -e "${RED}✗ Password reset timed out${NC}"
     echo "This may happen under memory pressure. Try again later or use GitLab UI."
